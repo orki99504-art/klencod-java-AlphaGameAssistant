@@ -12,11 +12,13 @@ import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Button;
 import android.widget.Toast;
+import android.view.Gravity;
 
 public class MainActivity extends Activity {
 
-    private final int PURPLE = Color.rgb(160, 70, 255);
     private final int BG = Color.rgb(15, 12, 22);
+    private final int PANEL = Color.rgb(37, 27, 49);
+    private final int PURPLE = Color.rgb(160, 70, 255);
     private LinearLayout root;
 
     @Override
@@ -34,32 +36,40 @@ public class MainActivity extends Activity {
         return d;
     }
 
-    private TextView text(String value, int size) {
+    private TextView label(String value, int size, int color) {
         TextView t = new TextView(this);
         t.setText(value);
-        t.setTextColor(Color.WHITE);
+        t.setTextColor(color);
         t.setTextSize(size);
-        t.setGravity(17);
-        t.setTypeface(null, Typeface.BOLD);
-        t.setPadding(12, 12, 12, 12);
+        t.setGravity(Gravity.CENTER);
+        t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        t.setPadding(10, 12, 10, 12);
         return t;
     }
 
-    private Button button(String value) {
+    private Button makeButton(String value) {
         Button b = new Button(this);
         b.setText(value);
         b.setTextColor(Color.WHITE);
         b.setTextSize(16);
         b.setAllCaps(false);
-        b.setBackground(shape(PURPLE, 24));
+        b.setGravity(Gravity.CENTER);
+        b.setMinHeight(58);
+        b.setPadding(12, 8, 12, 8);
+        b.setBackground(shape(PURPLE, 18));
         return b;
+    }
+
+    private void addGap(int height) {
+        TextView gap = new TextView(this);
+        root.addView(gap, new LinearLayout.LayoutParams(1, height));
     }
 
     private void base() {
         root = new LinearLayout(this);
-        root.setOrientation(1);
-        root.setGravity(17);
-        root.setPadding(26, 24, 26, 24);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setGravity(Gravity.CENTER);
+        root.setPadding(24, 20, 24, 20);
         root.setBackgroundColor(BG);
         setContentView(root);
     }
@@ -67,33 +77,32 @@ public class MainActivity extends Activity {
     private void showLogin() {
         base();
 
-        TextView title = text("ALPHA GAME", 30);
-        title.setTextColor(PURPLE);
-        root.addView(title);
-
-        root.addView(text("GAME ASSISTANT", 18));
-        root.addView(text("أدخل كود التفعيل للمتابعة", 16));
+        root.addView(label("ALPHA GAME", 30, PURPLE));
+        root.addView(label("GAME ASSISTANT", 18, Color.WHITE));
+        addGap(12);
+        root.addView(label("أدخل كود التفعيل", 17, Color.WHITE));
 
         EditText code = new EditText(this);
         code.setSingleLine(true);
         code.setHint("Activation Code");
         code.setHintTextColor(Color.LTGRAY);
         code.setTextColor(Color.WHITE);
-        code.setGravity(17);
+        code.setTextSize(16);
+        code.setGravity(Gravity.CENTER);
         code.setPadding(12, 8, 12, 8);
-        code.setBackground(shape(Color.rgb(38, 30, 48), 18));
+        code.setBackground(shape(PANEL, 16));
 
-        LinearLayout.LayoutParams p =
+        LinearLayout.LayoutParams fieldParams =
             new LinearLayout.LayoutParams(-1, 58);
-        p.setMargins(0, 20, 0, 14);
-        root.addView(code, p);
+        fieldParams.setMargins(0, 14, 0, 12);
+        root.addView(code, fieldParams);
 
-        Button activate = button("تفعيل الدخول");
-        root.addView(activate, p);
+        Button activate = makeButton("تفعيل الدخول");
+        root.addView(activate, new LinearLayout.LayoutParams(-1, 60));
 
         activate.setOnClickListener(v -> {
-            if (code.getText().toString().trim()
-                    .equals("ALPHA-2026")) {
+            if ("ALPHA-2026".equals(
+                    code.getText().toString().trim())) {
                 showHome();
             } else {
                 Toast.makeText(this, "كود التفعيل غير صحيح",
@@ -101,47 +110,54 @@ public class MainActivity extends Activity {
             }
         });
 
-        root.addView(text("ALPHA © 2026", 12));
+        addGap(14);
+        root.addView(label("ALPHA © 2026", 12, Color.LTGRAY));
     }
 
     private void showHome() {
         base();
 
-        TextView title = text("ALPHA GAME", 28);
-        title.setTextColor(PURPLE);
-        root.addView(title);
+        root.addView(label("ALPHA GAME", 28, PURPLE));
+        root.addView(label("اختار نسخة PUBG المثبتة عندك",
+            17, Color.WHITE));
+        addGap(10);
 
-        root.addView(text("مرحباً بك في مساعد الألعاب", 18));
-        root.addView(text("PUBG MOBILE GLOBAL", 15));
+        addGameButton("PUBG MOBILE GLOBAL", "com.tencent.ig");
+        addGameButton("PUBG MOBILE KR", "com.pubg.krmobile");
+        addGameButton("PUBG MOBILE VN", "com.vng.pubgmobile");
+        addGameButton("PUBG MOBILE TW", "com.rekoo.pubgm");
 
-        Button launch = button("فتح PUBG العالمية");
+        addGap(10);
+        root.addView(label(
+            "إذا ظهرت رسالة أن اللعبة غير مثبتة، تحقق من النسخة.",
+            12, Color.LTGRAY));
+
+        Button logout = makeButton("تسجيل الخروج");
+        LinearLayout.LayoutParams p =
+            new LinearLayout.LayoutParams(-1, 54);
+        p.setMargins(0, 12, 0, 0);
+        root.addView(logout, p);
+        logout.setOnClickListener(v -> showLogin());
+    }
+
+    private void addGameButton(String title, String packageName) {
+        Button b = makeButton(title);
         LinearLayout.LayoutParams p =
             new LinearLayout.LayoutParams(-1, 60);
-        p.setMargins(0, 24, 0, 12);
-        root.addView(launch, p);
+        p.setMargins(0, 5, 0, 5);
+        root.addView(b, p);
 
-        launch.setOnClickListener(v -> {
+        b.setOnClickListener(v -> {
             Intent intent = getPackageManager()
-                .getLaunchIntentForPackage("com.tencent.ig");
+                .getLaunchIntentForPackage(packageName);
 
             if (intent != null) {
                 startActivity(intent);
             } else {
                 Toast.makeText(this,
-                    "PUBG العالمية غير موجودة أو غير مثبتة",
+                    "هذه النسخة غير موجودة أو لا يمكن فتحها",
                     Toast.LENGTH_LONG).show();
             }
         });
-
-        Button about = button("حول التطبيق");
-        root.addView(about, p);
-        about.setOnClickListener(v ->
-            Toast.makeText(this,
-                "Alpha Game Assistant - Version 1.0",
-                Toast.LENGTH_LONG).show());
-
-        Button logout = button("تسجيل الخروج");
-        root.addView(logout, p);
-        logout.setOnClickListener(v -> showLogin());
     }
 }
